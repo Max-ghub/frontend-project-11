@@ -13,20 +13,20 @@ const renderError = (elements, error, prevError) => {
 
   const feedbackEl = document.createElement('p');
   feedbackEl.classList.add('feedback', 'm-0', 'position-absolute', 'small', 'text-danger');
-  feedbackEl.textContent = 'Ссылка должна быть валидным URL';
+  feedbackEl.textContent = error.message;
 
   elements.rssField.classList.add('is-invalid');
   elements.rssFormContainer.append(feedbackEl);
 };
-// eslint-disable-next-line no-unused-vars
-const render = (elements, state) => (path, value, prevValue) => {
+
+const render = (elements) => (path, value, prevValue) => {
   switch (path) {
     case 'error': {
       renderError(elements, value, prevValue);
       break;
     }
     default: {
-      console.log(`Unknown path: ${path}`);
+      // console.log(`Unknown path: ${path}`);
       break;
     }
   }

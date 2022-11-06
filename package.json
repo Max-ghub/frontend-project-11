@@ -22,6 +22,7 @@
   "homepage": "https://github.com/Max-ghub/frontend-project-11#readme",
   "dependencies": {
     "bootstrap": "^5.2.2",
+    "i18next": "^22.0.4",
     "on-change": "^4.0.1",
     "yup": "^0.32.11"
   },
