@@ -19,42 +19,23 @@ const feedbackToggle = ({ feedback }, state) => {
   feedback.classList.remove('text-danger');
 };
 
-const createFeedsContainer = (elements, i18nInstance) => {
-  const feedsContainer = document.createElement('div');
-  feedsContainer.classList.add('card', 'border-0');
+const createContainer = (elements, i18nInstance, name) => {
+  const container = document.createElement('div');
+  container.classList.add('card', 'border-0');
 
-  const feedsBody = document.createElement('div');
-  feedsBody.classList.add('card-body');
+  const body = document.createElement('div');
+  body.classList.add('card-body');
 
-  const feedsTitle = document.createElement('h2');
-  feedsTitle.classList.add('card-title', 'h4');
-  feedsTitle.textContent = i18nInstance.t('feeds.title');
-  feedsBody.append(feedsTitle);
+  const title = document.createElement('h2');
+  title.classList.add('card-title', 'h4');
+  title.textContent = i18nInstance.t(`${name}.title`);
+  body.append(title);
 
-  const feedsList = document.createElement('ul');
-  feedsList.classList.add('list-group', 'border-0', 'rounded-0');
+  const list = document.createElement('ul');
+  list.classList.add('list-group', 'border-0', 'rounded-0');
 
-  feedsContainer.append(feedsBody, feedsList);
-  elements.feeds.append(feedsContainer);
-};
-
-const createTasksContainer = (elements, i18nInstance) => {
-  const postsContainer = document.createElement('div');
-  postsContainer.classList.add('card', 'border-0');
-
-  const postsBody = document.createElement('div');
-  postsBody.classList.add('card-body');
-
-  const postsTitle = document.createElement('h2');
-  postsTitle.classList.add('card-title', 'h4');
-  postsTitle.textContent = i18nInstance.t('posts.title');
-  postsBody.append(postsTitle);
-
-  const postsList = document.createElement('ul');
-  postsList.classList.add('list-group', 'border-0', 'rounded-0');
-
-  postsContainer.append(postsBody, postsList);
-  elements.posts.append(postsContainer);
+  container.append(body, list);
+  elements[name].append(container);
 };
 
 const renderFormSubmitError = (elements, state, error, prevError, i18nInstance) => {
@@ -170,11 +151,13 @@ const render = (elements, state, i18nInstance) => (path, value, prevValue) => {
       break;
     }
     case 'uiState.feeds': {
-      createFeedsContainer(elements, i18nInstance);
+      const containerName = 'feeds';
+      createContainer(elements, i18nInstance, containerName);
       break;
     }
-    case 'uiState.tasks': {
-      createTasksContainer(elements, i18nInstance);
+    case 'uiState.posts': {
+      const containerName = 'posts';
+      createContainer(elements, i18nInstance, containerName);
       break;
     }
     default: {
