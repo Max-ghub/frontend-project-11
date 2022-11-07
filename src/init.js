@@ -7,19 +7,20 @@ import render from './render';
 import resources from './locales/index.js';
 import parser from './parser';
 
-const elements = {
-  formContainer: document.getElementById('rss-form-container'),
-  form: document.querySelector('.rss-form'),
-  field: document.getElementById('rss-field'),
-  submit: document.querySelector('.rss-form [type="submit"]'),
-  feeds: document.querySelector('.feeds'),
-  posts: document.querySelector('.posts'),
-  feedback: document.querySelector('#rss-form-container .feedback'),
-};
 
-const defaultLanguage = 'ru';
 
 const runApp = () => {
+  const elements = {
+    formContainer: document.getElementById('rss-form-container'),
+    form: document.querySelector('.rss-form'),
+    field: document.getElementById('rss-field'),
+    submit: document.querySelector('.rss-form [type="submit"]'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
+    feedback: document.querySelector('#rss-form-container .feedback'),
+  };
+
+  const defaultLanguage = 'ru';
   const i18nInstance = i18n.createInstance();
   i18nInstance.init({
     lng: defaultLanguage,
