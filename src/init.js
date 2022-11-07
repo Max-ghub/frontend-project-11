@@ -7,8 +7,6 @@ import render from './render';
 import resources from './locales/index.js';
 import parser from './parser';
 
-
-
 const runApp = () => {
   const elements = {
     formContainer: document.getElementById('rss-form-container'),
