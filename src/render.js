@@ -1,3 +1,5 @@
+import tracker from './tracker';
+
 /* eslint-disable no-param-reassign */
 const createFeedBackEl = (elements) => {
   const newFeedbackEl = document.createElement('p');
@@ -54,32 +56,43 @@ const renderFormSubmitError = (elements, state, error, prevError, i18nInstance) 
     }
   }
 
+  if (error.name === 'TypeError') {
+    error.message = i18nInstance.t('formSubmit.danger.ERR_NOT_RSS');
+  }
+
   feedbackToggle(elements, state);
   elements.feedback.textContent = error.message;
   elements.field.classList.add('is-invalid');
 };
 
-const renderFeedsAndPosts = (elements, state, feedId, i18nInstance) => {
-  // Feed
-  const feedData = state.feeds.find(({ id }) => id === feedId);
+const renderFeeds = (elements, state, feedsData, i18nInstance) => {
   const feedsListEl = elements.feeds.querySelector('ul.list-group');
 
-  const feedEl = document.createElement('li');
-  feedEl.classList.add('list-group-item', 'border-0', 'border-end-0');
+  const feeds = feedsData.map((feedData) => {
+    const feedEl = document.createElement('li');
+    feedEl.classList.add('list-group-item', 'border-0', 'border-end-0');
 
-  const feedTitleEl = document.createElement('h3');
-  feedTitleEl.classList.add('h6', 'm-0');
-  feedTitleEl.textContent = feedData.title;
+    const feedTitleEl = document.createElement('h3');
+    feedTitleEl.classList.add('h6', 'm-0');
+    feedTitleEl.textContent = feedData.title;
 
-  const feedDescEl = document.createElement('p');
-  feedDescEl.classList.add('m-0', 'small', 'text-black-50');
-  feedDescEl.textContent = feedData.description;
+    const feedDescEl = document.createElement('p');
+    feedDescEl.classList.add('m-0', 'small', 'text-black-50');
+    feedDescEl.textContent = feedData.description;
 
-  feedEl.append(feedTitleEl, feedDescEl);
-  feedsListEl.append(feedEl);
+    feedEl.append(feedTitleEl, feedDescEl);
 
-  // Posts
-  const postsData = state.posts.filter((post) => post.feedId === feedId);
+    return feedEl;
+  });
+
+  feedsListEl.innerHTML = '';
+  feedsListEl.prepend(...feeds);
+
+  feedbackToggle(elements, state);
+  elements.feedback.textContent = i18nInstance.t('formSubmit.seccess');
+};
+
+const renderPosts = (elements, postsData, i18nInstance, type = 'full') => {
   const postsListEl = elements.posts.querySelector('ul.list-group');
 
   const posts = postsData.map((postData) => {
@@ -128,22 +141,41 @@ const renderFeedsAndPosts = (elements, state, feedId, i18nInstance) => {
     postEl.append(postLinkEl, postButtonEl);
     return postEl;
   });
-  postsListEl.append(...posts);
 
-  // Feedback
-  feedbackToggle(elements, state);
-  elements.feedback.textContent = i18nInstance.t('formSubmit.seccess');
+  if (type === 'full') {
+    postsListEl.innerHTML = '';
+  }
+  postsListEl.prepend(...posts);
 };
 
 const render = (elements, state, i18nInstance) => (path, value, prevValue) => {
-  // console.log(path, value);
+  console.log(path, value);
   switch (path) {
-    case 'error': {
-      renderFormSubmitError(elements, state, value, prevValue, i18nInstance);
+    case 'rssData.newFeedId': {
+      const feedsData = state.rssData.feeds;
+      renderFeeds(elements, state, feedsData, i18nInstance);
+
+      const postsData = state.rssData.posts;
+      renderPosts(elements, postsData, i18nInstance);
+
       break;
     }
-    case 'newFeedId': {
-      renderFeedsAndPosts(elements, state, value, i18nInstance);
+    case 'tracker.enabled': {
+      setInterval(() => {
+        const newPostsPromise = tracker(state);
+        newPostsPromise
+          .then((postsDataAll) => {
+            postsDataAll.forEach((postsData) => {
+              state.rssData.posts.push(...postsData);
+              const renderPostsType = 'trackerPrepend';
+              renderPosts(elements, postsData, i18nInstance, renderPostsType);
+            });
+          });
+      }, 10000);
+      break;
+    }
+    case 'error': {
+      renderFormSubmitError(elements, state, value, prevValue, i18nInstance);
       break;
     }
     case 'uiState.submit': {
@@ -161,7 +193,6 @@ const render = (elements, state, i18nInstance) => (path, value, prevValue) => {
       break;
     }
     default: {
-      // console.log(`Unknown path: ${path}`);
       break;
     }
   }

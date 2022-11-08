@@ -5,7 +5,8 @@ import axios from 'axios';
 import { uniqueId } from 'lodash';
 import render from './render';
 import resources from './locales/index.js';
-import parser from './parser';
+import parseRSS from './parser';
+import getProxyURL from './getProxyURL';
 
 const runApp = () => {
   const elements = {
@@ -34,11 +35,18 @@ const runApp = () => {
 
   const initalState = {
     field: {
-      value: '',
+      value: null,
     },
-    newFeedId: null,
-    feeds: [],
-    posts: [],
+    rssData: {
+      newFeedId: null,
+      feeds: [],
+      posts: [],
+    },
+    tracker: {
+      enabled: false,
+      interval: 5000,
+      urls: [],
+    },
     error: null,
     uiState: {
       submit: false,
@@ -50,7 +58,7 @@ const runApp = () => {
   const state = onChange(initalState, render(elements, initalState, i18nInstance));
 
   const schemaURL = yup.string().url().nullable();
-  const proxy = 'https://allorigins.hexlet.app/raw?url=';
+
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -61,19 +69,33 @@ const runApp = () => {
     state.field.value = fieldValue;
 
     schemaURL.validate(state.field.value)
-      .then(() => {
-        const url = `${proxy}${encodeURIComponent(fieldValue)}`;
-        return axios.get(url);
-      }).then((response) => {
+      .then(() => axios.get(getProxyURL(state.field.value)))
+      .then((response) => {
         const feedId = uniqueId();
-        parser(response.data, state, feedId);
+
+        const parseType = 'submit';
+        const { feedData, postsData } = parseRSS(response, state, feedId, parseType);
+
+        state.uiState.feeds = true;
+        state.uiState.posts = true;
+        state.rssData.feeds.push(feedData);
+        state.rssData.posts.unshift(...postsData);
+
         return feedId;
       })
       .then((id) => {
-        state.uiState.feeds = true;
-        state.uiState.posts = true;
+        // Error
         state.error = null;
-        state.newFeedId = id;
+
+        // rssData
+        state.rssData.newFeedId = id;
+
+        // Tracker
+        state.tracker.urls.push({
+          url: state.field.value,
+          feedId: id,
+        });
+        state.tracker.enabled = true;
       })
       .catch((_err) => {
         state.error = _err;
