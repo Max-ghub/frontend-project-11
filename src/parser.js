@@ -23,7 +23,6 @@ const parseRSS = ({ data }, state, feedId, type = '') => {
 
       return postData;
     });
-
     return { feedData, postsData };
   }
 

@@ -41,6 +41,7 @@ const runApp = () => {
       newFeedId: null,
       feeds: [],
       posts: [],
+      urls: [],
     },
     tracker: {
       enabled: false,
@@ -68,6 +69,12 @@ const runApp = () => {
     const fieldValue = formData.get('url');
     state.field.value = fieldValue;
 
+    const existingUrl = state.rssData.urls.includes(state.field.value);
+    if (existingUrl) {
+      state.error = { name: 'ExistUrlError' };
+      return;
+    }
+
     schemaURL.validate(state.field.value)
       .then(() => axios.get(getProxyURL(state.field.value)))
       .then((response) => {
@@ -75,12 +82,10 @@ const runApp = () => {
 
         const parseType = 'submit';
         const { feedData, postsData } = parseRSS(response, state, feedId, parseType);
-
         state.uiState.feeds = true;
         state.uiState.posts = true;
         state.rssData.feeds.push(feedData);
-        state.rssData.posts.unshift(...postsData);
-
+        state.rssData.posts.push(...postsData);
         return feedId;
       })
       .then((id) => {
@@ -89,6 +94,7 @@ const runApp = () => {
 
         // rssData
         state.rssData.newFeedId = id;
+        state.rssData.urls.push(state.field.value);
 
         // Tracker
         state.tracker.urls.push({
