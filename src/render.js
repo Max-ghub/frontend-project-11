@@ -45,6 +45,7 @@ const feedbackToggle = (elements, state, i18nInstance) => {
 const renderFormSubmitError = (elements, state, error, prevError, i18nInstance) => {
   const hasError = error !== null;
   const hadError = prevError !== null;
+
   if (!hasError && hadError) {
     elements.field.classList.remove('is-invalid');
     return;
@@ -174,13 +175,13 @@ const render = (elements, state, i18nInstance) => (path, value, prevValue) => {
 
       break;
     }
+    case 'error': {
+      renderFormSubmitError(elements, state, value, prevValue, i18nInstance);
+      break;
+    }
     case 'tracker.enabled': {
       const { interval } = state.tracker;
       tracker(elements, state, i18nInstance, interval);
-      break;
-    }
-    case 'error': {
-      renderFormSubmitError(elements, state, value, prevValue, i18nInstance);
       break;
     }
     case 'uiState.submit': {
