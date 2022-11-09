@@ -23,7 +23,7 @@ const config = {
       template: 'index.html',
     }),
   ],
-  
+
   module: {
     rules: [
       {
